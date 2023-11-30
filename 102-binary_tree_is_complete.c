@@ -1,106 +1,91 @@
 #include "binary_trees.h"
+#include <stdio.h>
 
 /**
- * tree_height - function that creates a binary tree node
+ * binary_tree_is_leaf - checks if a node is a leaf
+ * @node: pointer to the node to check
  *
- * @tree: is a pointer to the parent node of the node to create
- *
- * Return: Your function must return a pointer to the new node,
- *         or NULL on failure
+ * Return: 1 if node is a leaf, and 0 otherwise. If node is NULL, return 0
  */
-int tree_height(const binary_tree_t *tree)
+int binary_tree_is_leaf(const binary_tree_t *node)
 {
-	int height_l;
-	int height_r;
-
-	if (tree == NULL)
-		return (0);
-
-	if (tree->left != NULL)
-		height_l = 1 + tree_height(tree->left);
-	else
-		height_l = 0;
-
-	if (tree->right != NULL)
-		height_r = 1 + tree_height(tree->right);
-	else
-		height_r = 0;
-
-	if (height_l > height_r)
-		return (height_l);
-	return (height_r);
+	if (node != NULL && node->left == NULL && node->right == NULL)
+		return (1);
+	return (0);
 }
 
 /**
- * tree_size - measures the size of a binary tree
- * @tree: pointer to the root node of the tree to measure the size
- * Return: size of a binary tree
- * If tree is NULL, the function must return 0
- **/
-
-int tree_size(const binary_tree_t *tree)
+ * binary_tree_height - measures the height of a binary tree
+ * @tree: pointer to the root node of the tree to measure the height of
+ *
+ * Return: the height of the tree. If tree is NULL, return 0
+ */
+size_t binary_tree_height(const binary_tree_t *tree)
 {
+	size_t left, right;
+
 	if (tree == NULL)
 		return (0);
-
-	return (1 + tree_size(tree->left) + tree_size(tree->right));
+	left = binary_tree_height(tree->left);
+	right = binary_tree_height(tree->right);
+	if (left >= right)
+		return (1 + left);
+	return (1 + right);
 }
 
 /**
  * binary_tree_is_perfect - checks if a binary tree is perfect
  * @tree: pointer to the root node of the tree to check
  *
- * Return: return 1 if the tree is perfect, otherwise 0
+ * Return: 1 if perfect, 0 otherwise. If tree is NULL, return 0
  */
 int binary_tree_is_perfect(const binary_tree_t *tree)
 {
-	int pow_result = 0;
+	binary_tree_t *l, *r;
 
-	if (tree == NULL)
-		return (0);
-	_pow(pow_result, 2, (tree_height(tree) + 1));
-	return (tree_size(tree) == pow_result - 1);
-}
-
-/**
- * complete - auxiliar binary_tree_complete function
- * @tree: pointer to the node to tranverse.
- * Return: 1 if tree is complete, otherwise 0
- */
-int complete(const binary_tree_t *tree)
-{
 	if (tree == NULL)
 		return (1);
-
-	if (tree->left == NULL && tree->right)
+	l = tree->left;
+	r = tree->right;
+	if (binary_tree_is_leaf(tree))
+		return (1);
+	if (l == NULL || r == NULL)
 		return (0);
-
-	if (tree->left && tree->right == NULL)
-		return (tree->parent->right->left == NULL);
-
-	return (complete(tree->left) && complete(tree->right));
+	if (binary_tree_height(l) == binary_tree_height(r))
+	{
+		if (binary_tree_is_perfect(l) && binary_tree_is_perfect(r))
+			return (1);
+	}
+	return (0);
 }
-
 /**
- * binary_tree_is_complete - checks if a binary tree is complete
+ * binary_tree_is_complete -  checks if a binary tree is complete
+ * @tree: pointer to the root node of the tree to check
  *
- * @tree: is a pointer to the root node of the tree to traverse
- *
- * Return: 1 if the tree is complete, otherwise 0.
+ * Return: 1 if complete, 0 otherwise. If tree is NULL, return 0
  */
 int binary_tree_is_complete(const binary_tree_t *tree)
 {
+	size_t l_height, r_height;
+	binary_tree_t *l, *r;
+
 	if (tree == NULL)
 		return (0);
-
-	if (binary_tree_is_perfect(tree) == 1)
+	if (binary_tree_is_leaf(tree))
 		return (1);
-
-	if (tree_height(tree->left) == tree_height(tree->right)
-	    || tree_height(tree->right) + 1 == tree_height(tree->left))
+	l = tree->left;
+	r = tree->right;
+	l_height = binary_tree_height(l);
+	r_height = binary_tree_height(r);
+	if (l_height == r_height)
 	{
-		return (complete(tree));
+		if (binary_tree_is_perfect(l) && binary_tree_is_complete(r))
+			return (1);
 	}
-
+	else if (l_height == r_height + 1)
+	{
+		if (binary_tree_is_complete(l) && binary_tree_is_perfect(r))
+			return (1);
+	}
 	return (0);
 }
